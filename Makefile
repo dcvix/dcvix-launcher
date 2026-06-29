@@ -3,7 +3,7 @@ MAIN_NAME=dcvix-launcher
 DIST_DIR=dist
 
 # Version information
-VERSION=$(shell (git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0-dev") | sed 's/^v//')
+VERSION?=$(shell (git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0-dev") | sed 's/^v//')
 RELEASE=1
 COMMIT=$(shell git rev-parse --short HEAD 2>/dev/null || echo "unknown")
 BUILD_TIME=$(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
