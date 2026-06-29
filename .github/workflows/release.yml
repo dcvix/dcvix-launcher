@@ -1,0 +1,255 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get version from tag
+        id: get_version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
+
+      - name: Install Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.26'
+
+      - name: Install Fyne build dependencies
+        run: >-
+          sudo apt-get update &&
+          sudo apt-get -y install
+          bc
+          gcc
+          libgl1-mesa-dev
+          libwayland-dev
+          libx11-dev
+          libxkbcommon-dev
+          xorg-dev
+          xvfb
+          language-pack-en
+
+      - name: Install packaging tools
+        run: >-
+          sudo apt-get -y install
+          dpkg-dev
+
+      - name: Downloads go modules dependencies
+        run: go mod tidy
+
+      - name: Build Linux binary
+        run: make update-toml; make build-linux
+
+      - name: Build DEB package
+        run: make deb
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-assets-linux
+          path: |
+            dist/dcvix-launcher-v${{ env.VERSION }}-linux-amd64.tar.gz
+            dist/dcvix-launcher_${{ env.VERSION }}-*_amd64.deb
+
+  build-rpm:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    container:
+      image: rockylinux/rockylinux:9
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get version from tag
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
+
+      - name: Install RPM build dependencies
+        run: |
+          dnf install -y 'dnf-command(config-manager)'
+          dnf config-manager --set-enabled crb
+          dnf install -y \
+            golang \
+            gcc \
+            rpm-build \
+            make \
+            which \
+            desktop-file-utils \
+            libX11-devel \
+            libxkbcommon-devel \
+            mesa-libGL-devel \
+            wayland-devel \
+            libXcursor-devel \
+            libXi-devel \
+            libXinerama-devel \
+            libXrandr-devel \
+            libXxf86vm-devel
+
+      - name: Install Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.26'
+
+      - name: Build RPM package
+        run: make update-toml && make rpm
+
+      - name: Upload RPM artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-assets-rpm
+          path: dist/*.rpm
+
+  build-windows:
+    runs-on: windows-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get version from tag
+        id: get_version
+        run: |
+          $version = $env:GITHUB_REF_NAME -replace '^v',''
+          echo "VERSION=$version" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+      - name: Install 7zip
+        run: choco install --no-progress 7zip.commandline
+
+      - name: Install NSIS
+        run: choco install --no-progress nsis
+
+      - name: Install Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.26'
+
+      - name: Install support for windows resources
+        run: go install github.com/tc-hib/go-winres@latest
+
+      - name: Downloads go modules dependencies
+        run: go mod tidy
+
+      - name: Build Windows binary
+        run: make build-windows
+
+      - name: Build NSIS installer
+        run: make installer
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-assets-windows
+          path: |
+            dist/dcvix-launcher-v${{ env.VERSION }}-windows-amd64.zip
+            dist/dcvix-launcher-v${{ env.VERSION }}-windows-amd64-setup.exe
+
+  build-darwin:
+    runs-on: macos-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get version from tag
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
+
+      - name: Install Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.26'
+
+      - name: Downloads go modules dependencies
+        run: go mod tidy
+
+      - name: Build macOS binary
+        run: make build-darwin
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-assets-darwin
+          path: dist/dcvix-launcher-v${{ env.VERSION }}-darwin-amd64.zip
+
+  release:
+    needs: [build-linux, build-rpm, build-windows, build-darwin]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Get version from tag
+        id: get_version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
+
+      - name: Download Linux artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: release-assets-linux
+
+      - name: Download RPM artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: release-assets-rpm
+
+      - name: Download Windows artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: release-assets-windows
+
+      - name: Download macOS artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: release-assets-darwin
+
+      - name: Consolidate artifacts
+        run: mv dist/* . && rm -rf dist
+
+      - name: Generate checksums
+        run: sha256sum *.tar.gz *.zip *.deb *.rpm *.exe > checksums.txt
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            *.tar.gz
+            *.zip
+            *.deb
+            *.rpm
+            *.exe
+            checksums.txt
+          name: dcvix-launcher ${{ env.VERSION }}
+          body: |
+            ## dcvix Launcher ${{ env.VERSION }}
+
+            ### Packages
+            - Linux binary (tar.gz)
+            - Windows binary (zip)
+            - macOS binary (zip)
+            - Debian package (deb)
+            - RPM package
+            - Windows installer (exe)
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

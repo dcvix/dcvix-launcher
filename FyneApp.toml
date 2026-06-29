@@ -1,0 +1,27 @@
+Website = "https://github.com/dcvix/dcvix-launcher"
+
+[Details]
+Icon = "Icon.png"
+Name = "dcvix-launcher"
+ID = "net.cortassa.dcvix-launcher"
+Version = "0.0.0"
+Build = 1
+
+[Development]
+HelperText = "This binary was built with debug symbols"
+
+[Release]
+HelperText = "This binary was built without debug symbols"
+
+[Source]
+Repo = "https://github.com/dcvix/dcvix-launcher"
+Dir = "cmd/dcvix-launcher"
+
+[LinuxAndBSD]
+GenericName = "dcvix Launcher"
+Categories = ["Network", "RemoteDesktop"]
+Comment = "A gui client to allow user to connect to a DCV remote desktop in an infrastructure managed by dcvix."
+Keywords = ["DCV", "Network", "RemoteDesktop"]
+
+[Migrations]
+fyneDo = true

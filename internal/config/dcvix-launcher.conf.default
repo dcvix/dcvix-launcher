@@ -1,0 +1,18 @@
+[dcvix-launcher]
+# Director URL. Must use https (e.g. https://director.lan:8445)
+# broker =
+# Pre-filled username in the login form
+# user_id =
+# Whether a one-time password is required at login
+otp = false
+# Path to the DCV viewer executable
+command = dcvviewer
+# Allow self-signed director certificates (not recommended for production)
+accept-untrusted-cert = false
+# Let users type an arbitrary server hostname
+allow-custom-server = false
+
+[log]
+# log verbosity. Default: info
+# Valid values: debug, info, warn, error, fatal
+level = info

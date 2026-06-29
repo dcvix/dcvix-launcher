@@ -1,0 +1,15 @@
+Package: dcvix-launcher
+Version: @VERSION@-@RELEASE@
+Section: net
+Priority: optional
+Architecture: amd64
+Maintainer: Diego Cortassa <diego@cortassa.net>
+Depends: libgl1, libx11-6, libxkbcommon0
+Description: DCV remote desktop client launcher
+ dcvix is an orchestrator for the Amazon DCV remote desktop system
+ focused on simplicity, lightweight operation, and security.
+ It enables small to medium-sized organizations to manage the
+ creation of sessions and server pools.
+ .
+ This package provides the launcher GUI that allows users to
+ authenticate, select a DCV server, and launch the DCV viewer.

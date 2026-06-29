@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=dcvix Launcher
+GenericName=dcvix Launcher
+Comment=A GUI client to allow users to connect to a DCV remote desktop in an infrastructure managed by dcvix.
+Exec=dcvix-launcher
+Icon=dcvix-launcher
+Categories=Network;
+Keywords=DCV;Network;
+Terminal=false
+StartupNotify=true
