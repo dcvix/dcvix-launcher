@@ -89,6 +89,7 @@ jobs:
           dnf config-manager --set-enabled crb
           dnf install -y \
             gcc \
+            golang \
             rpm-build \
             make \
             git \
@@ -255,10 +256,10 @@ jobs:
 
             ### Packages
             - Linux binary (tar.gz)
-            - Windows binary (zip)
             - macOS binary (zip)
             - Debian package (deb)
-            - RPM package
+            - RPM package (rpm)
+            - Windows binary (zip)
             - Windows installer (exe)
           draft: false
           prerelease: false

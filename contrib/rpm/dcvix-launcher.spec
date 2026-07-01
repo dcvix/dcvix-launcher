@@ -17,12 +17,15 @@ BuildRequires: desktop-file-utils
 Requires: desktop-file-utils
 
 %description
-dcvix is an orchestrator for the Amazon DCV remote desktop system focused on
-simplicity, lightweight operation, and security. It enables small to medium-sized
-organizations to manage the creation of sessions and server pools.
+dcvix is a session broker and server-pool manager
+for Amazon DCV. It provides centralized authentication,
+desktop session lifecycle management,
+and automatic allocation of DCV servers.
+This package provides the launcher, a GUI client that runs on the
+user's computer. It authenticates users against the director,
+displays available DCV servers, and launches the DCV viewer.
 
-This package provides the launcher GUI that allows users to authenticate,
-select a DCV server, and launch the DCV viewer.
+.
 
 %prep
 %setup -q -n %{name}-v%{version}-linux-amd64
@@ -55,5 +58,5 @@ desktop-file-validate %{_datadir}/applications/%{name}.desktop || :
 %doc README.md
 
 %changelog
-* Thu Jun 04 2026 Diego Cortassa <diego@cortassa.net> - 0.1.0-1
+* Thu Jun 04 2026 Diego Cortassa <diego@cortassa.net> - %{version}-%{release}
 - Initial package

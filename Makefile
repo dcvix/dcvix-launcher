@@ -34,27 +34,44 @@ build-packages: rpm deb installer
 .PHONY: build-linux
 build-linux: update-toml
 	mkdir -p $(DIST_DIR)/$(LINUX_AMD64_DIR)
-	GOOS=linux GOARCH=amd64 $(GO) build -trimpath -ldflags $(LDFLAGS) -o $(DIST_DIR)/$(LINUX_AMD64_DIR)/$(LINUX_AMD64_BINARY) ./cmd/$(MAIN_NAME)
+	GOOS=linux GOARCH=amd64 $(GO) build \
+		-trimpath -ldflags $(LDFLAGS) \
+		-o $(DIST_DIR)/$(LINUX_AMD64_DIR)/$(LINUX_AMD64_BINARY) ./cmd/$(MAIN_NAME)
 	cp README.md LICENSE.md $(DIST_DIR)/$(LINUX_AMD64_DIR)/
 	cd $(DIST_DIR) && tar czf $(LINUX_AMD64_DIR).tar.gz $(LINUX_AMD64_DIR)
 
 # Build for Windows
 .PHONY: build-windows
-build-windows: update-toml
-	go-winres simply --product-version $(VERSION).0 --file-version $(VERSION).0 --file-description "Graphical interface to easily launch the DCV viewer" --product-name "DCV Launcher" --copyright "Diego Cortassa" --original-filename "$(WINDOWS_AMD64_BINARY)" --icon Icon.png
+build-windows: update-toml windows-resource
 	mkdir -p $(DIST_DIR)/$(WINDOWS_AMD64_DIR)
-	GOOS=windows GOARCH=amd64 $(GO) build -trimpath -ldflags $(LDFLAGS) -o $(DIST_DIR)/$(WINDOWS_AMD64_DIR)/$(WINDOWS_AMD64_BINARY) ./cmd/$(MAIN_NAME)
+	GOOS=windows GOARCH=amd64 $(GO) build \
+		-trimpath -ldflags $(LDFLAGS) \
+		-o $(DIST_DIR)/$(WINDOWS_AMD64_DIR)/$(WINDOWS_AMD64_BINARY) ./cmd/$(MAIN_NAME)
 	cp README.md LICENSE.md $(DIST_DIR)/$(WINDOWS_AMD64_DIR)/
 	cd $(DIST_DIR) && 7z a -bd -r $(WINDOWS_AMD64_DIR).zip $(WINDOWS_AMD64_DIR)
 
 # Build for Windows cross compile
 .PHONY: build-windows-cross
-build-windows-cross: update-toml
-	go-winres simply --product-version $(VERSION).0 --file-version $(VERSION).0 --file-description "Graphical interface to easily launch the DCV viewer" --product-name "DCV Launcher" --copyright "Diego Cortassa" --original-filename "$(WINDOWS_AMD64_BINARY)" --icon Icon.png
+build-windows-cross: update-toml windows-resource
 	mkdir -p $(DIST_DIR)/$(WINDOWS_AMD64_DIR)	
-	CGO_ENABLED=1 GOOS=windows GOARCH=amd64 CC=x86_64-w64-mingw32-gcc $(GO) build -trimpath -ldflags $(LDFLAGS) -o $(DIST_DIR)/$(WINDOWS_AMD64_DIR)/$(WINDOWS_AMD64_BINARY) ./cmd/$(MAIN_NAME)
+	CGO_ENABLED=1 GOOS=windows GOARCH=amd64 CC=x86_64-w64-mingw32-gcc $(GO) build \
+		-trimpath -ldflags $(LDFLAGS) \
+		-o $(DIST_DIR)/$(WINDOWS_AMD64_DIR)/$(WINDOWS_AMD64_BINARY) ./cmd/$(MAIN_NAME)
 	cp README.md LICENSE.md $(DIST_DIR)/$(WINDOWS_AMD64_DIR)/
 	cd $(DIST_DIR) && 7z a -bd -r $(WINDOWS_AMD64_DIR).zip $(WINDOWS_AMD64_DIR)
+
+# Compile resource file for version info and icon
+.PHONY: windows-resource
+windows-resource:
+	go-winres simply \
+		--product-version $(VERSION).0 \
+		--file-version $(VERSION).0 \
+		--file-description "Graphical interface to easily launch the DCV viewer" \
+		--product-name "dcvix Launcher" \
+		--copyright "Diego Cortassa" \
+		--original-filename "$(WINDOWS_AMD64_BINARY)" \
+		--icon Icon.png
+
 
 # Build for macOS
 .PHONY: build-darwin
