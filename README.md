@@ -14,11 +14,15 @@ It consists of three components:
 dcvix Launcher
 ==============
 
+A GUI client that runs on the
+user's computer. It authenticates users against the director,
+displays available DCV servers, and launches the DCV viewer.
+
 A GUI client to connect to a DCV remote desktop in an infrastructure managed by dcvix.
 
-![Screenshot](assets/Screenshot_01.png)
-![Screenshot](assets/Screenshot_02.png)
-![Screenshot](assets/Screenshot_03.png)
+<img src="assets/Screenshot_01.png" width="200" alt="Screenshot 1">
+<img src="assets/Screenshot_02.png" width="200" alt="Screenshot 2">
+<img src="assets/Screenshot_03.png" width="200" alt="Screenshot 3">
 
 Written in Go with the Fyne toolkit, it runs on Linux, Windows and macOS.
 
